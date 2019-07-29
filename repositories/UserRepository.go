@@ -1,14 +1,14 @@
 package repositories
 
 import (
-	"inventory/interfaces"
+	"inventory/iInfrastructures"
 	"inventory/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type UserRepository struct {
-	interfaces.IDbHandler
+	iInfrastructures.IDbHandler
 }
 
 func (repository *UserRepository) GetUserById(userId int) (user models.UserModel, err error) {
@@ -18,7 +18,11 @@ func (repository *UserRepository) GetUserById(userId int) (user models.UserModel
 	}
 
 	for query.Next() {
-		query.Scan(&user.UserId, &user.UserName, &user.UserFullname, &user.UserEmail)
+		scanErr := query.Scan(&user.UserId, &user.UserName, &user.UserFullname, &user.UserEmail)
+		if scanErr != nil {
+			err = scanErr
+			return
+		}
 	}
 
 	return

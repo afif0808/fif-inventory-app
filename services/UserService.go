@@ -2,24 +2,14 @@ package services
 
 import (
 	"inventory/interfaces"
-	"inventory/models"
+	"inventory/iModels"
 )
 
 type UserService struct {
 	interfaces.IUserRepository
-	interfaces.ILoginRepository
 }
 
-func (service *UserService) GetUser(token string) (user models.UserModel, userErr error) {
-	login, loginErr := service.GetLoginByToken(token)
-
-	if loginErr != nil {
-		return
-	}
-	userId := login.GetLoginUserId()
-	user, userErr = service.GetUserById(userId)
-	if userErr != nil {
-		return
-	}
+func (service *UserService) GetUser(userId int) (iUser iModels.IUserModel, iUserErr error) {
+	iUser, iUserErr = service.GetUserById(userId)
 	return
 }

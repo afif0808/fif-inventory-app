@@ -1,7 +1,7 @@
 package repositories
 
-import "inventory/interfaces"
+import "inventory/iInfrastructures"
 
 type CompanyRepository struct {
-	interfaces.IDbHandler
+	iInfrastructures.IDbHandler
 }

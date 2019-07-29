@@ -3,7 +3,7 @@ package infrastructures
 import (
 	"database/sql"
 	"fmt"
-	"inventory/interfaces"
+	"inventory/iInfrastructures"
 )
 
 type MySQLHandler struct {
@@ -14,24 +14,29 @@ func (handler *MySQLHandler) Execute(query string, args ...interface{}) {
 	handler.Conn.Exec(query, args...)
 }
 
-func (handler *MySQLHandler) Query(query string, args ...interface{}) (interfaces.IRow, error) {
+func (handler *MySQLHandler) Query(query string, args ...interface{}) (iInfrastructures.IRows, error) {
 	rows, err := handler.Conn.Query(query, args...)
 
 	if err != nil {
 		fmt.Println(err)
-		return new(MySqlRow), err
+		return new(MySqlRows), err
 	}
-	row := new(MySqlRow)
+	row := new(MySqlRows)
 	row.Rows = rows
 
 	return row, nil
 }
+func (handler *MySQLHandler) QuerySingle(query string, args ...interface{}) iInfrastructures.IRow {
+	row := handler.Conn.QueryRow(query, args...)
+	return row
+}
 
-type MySqlRow struct {
+// Multiple rows
+type MySqlRows struct {
 	Rows *sql.Rows
 }
 
-func (r MySqlRow) Scan(dest ...interface{}) error {
+func (r MySqlRows) Scan(dest ...interface{}) error {
 	err := r.Rows.Scan(dest...)
 	if err != nil {
 		return err
@@ -40,6 +45,15 @@ func (r MySqlRow) Scan(dest ...interface{}) error {
 	return nil
 }
 
-func (r MySqlRow) Next() bool {
+func (r MySqlRows) Next() bool {
 	return r.Rows.Next()
+}
+
+// DESC : Single row
+type MySqlRowSingle struct {
+	Row *sql.Row
+}
+
+func (r *MySqlRowSingle) Scan(dest ...interface{}) error {
+	return r.Scan(dest...)
 }
