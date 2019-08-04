@@ -1,7 +1,8 @@
 package interfaces
 
-import "inventory/models"
+import "inventory/iModels"
 
 type IUserRepository interface {
-	GetUserById(userId int) (user *models.UserModel, err error)
+	GetUserById(userId int) (iModels.IUserModel, error)
+	GetUserByUsernameAndPassword(username, password string) (iModels.IUserModel, error)
 }
