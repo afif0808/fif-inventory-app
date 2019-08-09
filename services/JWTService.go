@@ -2,9 +2,10 @@ package services
 
 import (
 	"fmt"
+	"inventory/appErr"
+	"inventory/iInfrastructures"
 	"inventory/iModels"
-	"inventory/models"
-	"strconv"
+	"inventory/iServices"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -12,45 +13,47 @@ import (
 type JWTService struct {
 	JWT_SIGNING_METHOD *jwt.SigningMethodHMAC
 	JWT_SIGNATURE_KEY  []byte
+	iInfrastructures.ICacheHandler
+	iServices.ErrorService
 }
 
 type JWTClaims struct {
 	jwt.StandardClaims
-	UserId int
+	UserIdentity string
 }
 
-func (service *JWTService) JWTValidate(token string) (iModels.IUserAuthorizationModel, error) {
-	var userAuthorization models.UserAuthorizationModel
-	var jwtValidateErr error
+func (service *JWTService) JWTAuthenticate(token string) (iModels.IUserAccess, error) {
+	// Handling error is suck
+	var userAccess iModels.IUserAccess
+	var jwtAuthenticateErr error
 	var jwtToken *jwt.Token
-	var jwtTokenErr error
+	// var jwtTokenSignedString string
 	var claims jwt.MapClaims
 	var claimsOk bool
 
-	jwtToken, jwtTokenErr = jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+	jwtToken, jwtAuthenticateErr = jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Signing method invalid")
+			return nil, service.ErrorAndCode(fmt.Errorf("Signing method invalid"), appErr.ErrUnexpected)
 		} else if method != service.JWT_SIGNING_METHOD {
-			return nil, fmt.Errorf("Signing method invalid")
+			return nil, service.ErrorAndCode(fmt.Errorf("Signing method invalid"), appErr.ErrUnexpected)
 		}
 
 		return service.JWT_SIGNATURE_KEY, nil
 	})
 
-	if jwtTokenErr != nil {
-		return nil, jwtTokenErr
+	if jwtAuthenticateErr != nil {
+		return nil, service.ErrorAndCode(jwtAuthenticateErr, appErr.ErrUnexpected)
 	}
 
 	claims, claimsOk = jwtToken.Claims.(jwt.MapClaims)
-
-	if !claimsOk || !jwtToken.Valid {
-		return nil, jwtTokenErr
+	if !claimsOk {
+		return nil, service.ErrorAndCode(fmt.Errorf("Error : the jwt claims is not 'jwt.MapClaims' type"), appErr.ErrUnexpected)
 	}
-	// log.Println(claims)
-	userAuthorization.UserId, jwtValidateErr = strconv.Atoi(fmt.Sprint(claims["UserId"]))
-	return userAuthorization, jwtValidateErr
-}
+	// jwtTokenSignedString, jwtAuthenticateErr = jwtToken.SignedString(service.JWT_SIGNATURE_KEY)
 
+	userAccess.SetUserIdentity(claims["UserId"])
+	return userAccess, nil
+}
 func (service *JWTService) JWTCreate(claims jwt.Claims) (string, error) {
 	var jwtSignedToken string
 	var jwtToken *jwt.Token
@@ -62,7 +65,6 @@ func (service *JWTService) JWTCreate(claims jwt.Claims) (string, error) {
 	return jwtSignedToken, nil
 
 }
-
 func (service *JWTService) JWTGetSignatureKey() []byte {
 	return service.JWT_SIGNATURE_KEY
 }

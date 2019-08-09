@@ -2,7 +2,9 @@ package iInfrastructures
 
 type ICacheHandler interface {
 	// SET AND UPDATE CACHE
-	SetCache(key string, value []byte) error
+	SetCache(key string, value interface{}) error
 	// GET CACHE
-	GetCache(key string) ([]byte, error)
+	GetCache(key string) (interface{}, error)
+	// DELETE CACHE
+	DeleteCache(key string) error
 }

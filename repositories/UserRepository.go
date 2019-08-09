@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"inventory/appErr"
 	"inventory/iInfrastructures"
 	"inventory/iModels"
+	"inventory/iServices"
 	"inventory/models"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -11,14 +13,18 @@ import (
 
 type UserRepository struct {
 	iInfrastructures.IDbHandler
+	iServices.ErrorService
 }
 
-func (repository *UserRepository) GetUserById(userId int) (iModels.IUserModel, error) {
+func (repository *UserRepository) GetUserByIdentity(userIdentity string) (iModels.IUserModel, error) {
 	var user models.UserModel
-	query := repository.QuerySingle("SELECT * FROM user WHERE user_id = ?", userId)
+	query := repository.QuerySingle("SELECT * FROM user WHERE user_id = ?", userIdentity)
 	scanErr := query.Scan(&user.UserId, &user.UserName, &user.UserFullname, &user.UserEmail)
-	if scanErr != nil && scanErr != sql.ErrNoRows {
-		return nil, scanErr
+	switch true {
+	case scanErr == sql.ErrNoRows:
+		return nil, repository.ErrorAndCode(scanErr, appErr.ErrNotFound)
+	case scanErr != nil:
+		return nil, repository.ErrorAndCode(scanErr, appErr.ErrUnexpected)
 	}
 
 	return &user, nil
@@ -31,8 +37,14 @@ func (repository *UserRepository) GetUserByUsernameAndPassword(username, passwor
 	)
 
 	scanErr := query.Scan(&user.UserId, &user.UserName, &user.UserFullname, &user.UserEmail)
-	if scanErr != nil && scanErr != sql.ErrNoRows {
-		return nil, scanErr
+	// NOTE: 'empty result' is one of the error
+
+	switch true {
+	case scanErr == sql.ErrNoRows:
+		return nil, repository.ErrorAndCode(scanErr, appErr.ErrNotFound)
+	case scanErr != nil:
+		return nil, repository.ErrorAndCode(scanErr, appErr.ErrUnexpected)
 	}
+
 	return &user, nil
 }
