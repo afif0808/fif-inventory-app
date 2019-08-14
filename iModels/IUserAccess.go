@@ -1,6 +1,6 @@
 package iModels
 
-type IUserAccess interface {
+type IUserAccessModel interface {
 	GetUserIdentity() string
 	SetUserIdentity(interface{}) error
 }

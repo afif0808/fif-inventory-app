@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"inventory/appErr"
-	"inventory/iInfrastructures"
 	"inventory/iModels"
 	"inventory/iServices"
 
@@ -13,8 +12,8 @@ import (
 type JWTService struct {
 	JWT_SIGNING_METHOD *jwt.SigningMethodHMAC
 	JWT_SIGNATURE_KEY  []byte
-	iInfrastructures.ICacheHandler
-	iServices.ErrorService
+	// iInfrastructures.ICacheHandler
+	iServices.IErrorService
 }
 
 type JWTClaims struct {
@@ -22,9 +21,9 @@ type JWTClaims struct {
 	UserIdentity string
 }
 
-func (service *JWTService) JWTAuthenticate(token string) (iModels.IUserAccess, error) {
+func (service *JWTService) JWTAuthenticate(token string) (iModels.IUserAccessModel, error) {
 	// Handling error is suck
-	var userAccess iModels.IUserAccess
+	var userAccess iModels.IUserAccessModel
 	var jwtAuthenticateErr error
 	var jwtToken *jwt.Token
 	// var jwtTokenSignedString string

@@ -10,7 +10,7 @@ import (
 
 type UserAccessRepository struct {
 	iInfrastructures.ICacheHandler
-	iServices.ErrorService
+	iServices.IErrorService
 }
 
 func (repository *UserAccessRepository) UserBlackList(userIdentity string) error {

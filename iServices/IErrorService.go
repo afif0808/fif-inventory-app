@@ -2,6 +2,6 @@ package iServices
 
 import "inventory/iModels"
 
-type ErrorService interface {
+type IErrorService interface {
 	ErrorAndCode(error, int) iModels.IErrorModel
 }

@@ -8,3 +8,6 @@ type ErrorModel struct {
 func (err ErrorModel) Error() string {
 	return err.Err.Error()
 }
+func (err ErrorModel) ErrorCode() int {
+	return err.ErrCode
+}

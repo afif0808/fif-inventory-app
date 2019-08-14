@@ -47,8 +47,8 @@ func (service *UserAccessService) AuthenticateUser(username, password string) (s
 	return token, nil
 }
 
-func (service *UserAccessService) ValidateUser(token string) (iModels.IUserAccess, error) {
-	var userAccess iModels.IUserAccess
+func (service *UserAccessService) ValidateUser(token string) (iModels.IUserAccessModel, error) {
+	var userAccess iModels.IUserAccessModel
 	var validateUserErr error
 	var isUserBlackListed bool
 	userAccess, validateUserErr = service.JWTAuthenticate(token)

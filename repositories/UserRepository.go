@@ -13,7 +13,7 @@ import (
 
 type UserRepository struct {
 	iInfrastructures.IDbHandler
-	iServices.ErrorService
+	iServices.IErrorService
 }
 
 func (repository *UserRepository) GetUserByIdentity(userIdentity string) (iModels.IUserModel, error) {
